@@ -1,0 +1,72 @@
+<style>
+  div.friend-buttons.can-friend button.unfriend {
+    display: none;
+  }
+
+  div.friend-buttons.can-unfriend button.friend {
+    display: none;
+  }
+</style>
+
+<ul>
+  <% @users.each do |user| %>
+    <% next if user.id == current_user.id %>
+    <li>
+      <%= user.username %>
+
+      <% if Friendship.can_friend?(current_user.id, user.id) %>
+       <div class="friend-buttons can-friend">
+        <button class="friend" data-inFriendId="<%= user.id %>" data-outFriendId="<%= current_user.id %>">add friend</button>
+
+        <button class="unfriend" data-inFriendId="<%= user.id %>" data-outFriendId="<%= current_user.id %>">unfriend</button>
+      </div>
+      <% else %>
+       <div class="friend-buttons can-unfriend">
+        <button class="friend" data-inFriendId="<%= user.id %>" data-outFriendId="<%= current_user.id %>">add friend</button>
+
+        <button class="unfriend" data-inFriendId="<%= user.id %>" data-outFriendId="<%= current_user.id %>">unfriend</button>
+      </div>
+      <% end %>
+    </div>
+  </li>
+
+  <% end %>
+</ul>
+
+<script type="text/javascript">
+  var toggleFriendButton = function(element){
+    $(element).toggleClass('can-friend');
+    $(element).toggleClass('can-unfriend');
+  };
+
+  $(".friend").on("click", function(event){
+    // $(this).text("Friending...");
+    var inId = $(this).attr("data-inFriendId");
+    var outId = $(this).attr("data-outFriendId");
+    var url = "/users/" + inId + "/friendship";
+    var $div = $(this).parent();
+    $.ajax({
+      type: "POST",
+      url: url,
+      success: function(res){
+        toggleFriendButton($div);
+      }
+    });
+  });
+
+  $(".unfriend").on("click", function(event){
+    // $(this).text("unfriending...");
+    var inId = $(this).attr("data-inFriendId");
+    var outId = $(this).attr("data-outFriendId");
+    var url = "/users/" + inId + "/friendship";
+    var $div = $(this).parent();
+
+    $.ajax({
+      type: "DELETE",
+      url: url,
+      success: function(res){
+        toggleFriendButton($div);
+      }
+    });
+  });
+</script>
